@@ -1,3 +1,5 @@
+# Startowy projekt, napisany za pomocą Claude, nie testowany jeszcze
+
 # NBT Evo – dane silnika na ekranie iDrive
 
 Natywna aplikacja iDrive (ID5/ID6, QNX) pokazująca na żywo: **temperaturę wody, temperaturę oleju, obroty, prędkość,
