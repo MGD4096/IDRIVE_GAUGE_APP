@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <plugin>
-	<name>EngineData</name>
+	<name>GaugeApp</name>
 	<type>App</type>
-	<file>{pluginDir}/EngineData</file>
+	<file>{pluginDir}/GaugeApp</file>
 	<config>
 		<autoStart>yes</autoStart>
 		<dependencies>
@@ -13,9 +13,9 @@
 			</pluginAppConnector>
 		</dependencies>
 		<parameters>
-			<DescFile>{pluginDir}/EngineData.xml</DescFile>
-			<TextDBFile>{pluginDir}/EngineData_ALL_Texts.zip</TextDBFile>
-			<ImageDBFile>{pluginDir}/EngineData_ALL_Images.zip</ImageDBFile>
+			<DescFile>{pluginDir}/GaugeApp.xml</DescFile>
+			<TextDBFile>{pluginDir}/GaugeApp_ALL_Texts.zip</TextDBFile>
+			<ImageDBFile>{pluginDir}/GaugeApp_ALL_Images.zip</ImageDBFile>
 		</parameters>
 	</config>
 </plugin>

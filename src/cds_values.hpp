@@ -206,7 +206,7 @@ inline void gearText(int g, char* out, size_t n) {
     else snprintf(out, n, "--");
 }
 
-// Fills the rows (UTF-8). Row order = label order in EngineData.xml.
+// Fills the rows (UTF-8). Row order = label order in GaugeApp.xml.
 inline void formatRows(const Metrics& m, char rows[kRowCount][kRowLen]) {
     char a[24], b[24];
     if (m.hasCoolant) snprintf(rows[0], kRowLen, ENG_TXT_COOLANT ": %d " ENG_DEG "C", roundInt(m.coolant));

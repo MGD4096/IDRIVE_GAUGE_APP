@@ -1,29 +1,38 @@
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
-# Host tests (Linux g++). From the project root: `make check`.
-#   test_cds_values   parsing and display rows (src/cds_values.hpp)
-#   app_host_test     host build of src/engine_data.cpp, loaded with dlopen against fake_appframework.cpp
-OUT := build
-CXX ?= g++
-WARN := -Wall -Wextra
+# Engine data PluginApp for BMW NBT Evo (QNX Neutrino 6.5, ARMv7 little endian, GNU libstdc++ variant to match HmiMain3D).
+#
+#   make             build libGaugeApp.so and the text/image DBs      (needs qcc, see below)
+#   make db          only the DBs (python3 + Pillow)
+#   make check       host tests with the Linux g++ (no QNX needed)
+#   make clean
+#
+# RHMI_LIBDIR must hold copies of the car's libAppFramework.A.so and libCoreFramework.A.so (opt/hmi/ID5/lib in a
+# firmware dump). They are BMW's files and are not part of this project; copy them from your own head unit.
 
-.PHONY: check clean
-check: $(OUT)/test_cds_values $(OUT)/app_host_test $(OUT)/libEngineData.so
-	$(OUT)/test_cds_values
-	$(OUT)/app_host_test $(OUT)/libEngineData.so
+QCC ?= qcc
+RHMI_LIBDIR ?= ./lib
+RHMI_LIBS = $(wildcard $(RHMI_LIBDIR)/libAppFramework.A.so $(RHMI_LIBDIR)/libCoreFramework.A.so)
 
-$(OUT):
-	mkdir -p $(OUT)
+PLUGIN_CXX      = $(QCC) -Vgcc_ntoarmv7le_gpp
+PLUGIN_CXXFLAGS = -O2 -Wall -D_QNX_SOURCE -march=armv7-a -mfpu=vfpv3 -mfloat-abi=softfp -fPIC -I./src
 
-# The app is C++98 (QNX SDP 6.5 / GCC 4.4); keep the host build in the same dialect.
-$(OUT)/test_cds_values: test_cds_values.cpp ../src/cds_values.hpp | $(OUT)
-	$(CXX) -std=gnu++98 $(WARN) -I../src -o $@ test_cds_values.cpp
+.PHONY: all lib db check clean
+all: lib db
 
-$(OUT)/libEngineData.so: ../src/engine_data.cpp ../src/cds_values.hpp | $(OUT)
-	$(CXX) -std=gnu++98 $(WARN) -fPIC -shared -I../src -o $@ ../src/engine_data.cpp -ldl -lpthread
+lib: libGaugeApp.so
 
-# -rdynamic: the library looks up bmw::Runnable's vtable with dlsym(RTLD_DEFAULT) and needs the fake's symbols.
-$(OUT)/app_host_test: app_host_test.cpp fake_appframework.cpp fake_appframework.hpp | $(OUT)
-	$(CXX) -std=gnu++11 $(WARN) -rdynamic -o $@ app_host_test.cpp fake_appframework.cpp -ldl
+libGaugeApp.so: src/engine_data.cpp src/cds_values.hpp
+	@test -n "$(RHMI_LIBS)" || { echo "put libAppFramework.A.so and libCoreFramework.A.so from the car into $(RHMI_LIBDIR) (or set RHMI_LIBDIR)"; exit 1; }
+	@echo [BUILD] $@
+	$(PLUGIN_CXX) $(PLUGIN_CXXFLAGS) -shared -Wl,-soname,libGaugeApp.so -o $@ src/engine_data.cpp $(RHMI_LIBS) -Wl,--allow-shlib-undefined -lang-c++
+	@echo [DONE] $@ - install with GaugeApp.manifest, GaugeApp.xml and the two zips into Plugins/GaugeApp
+
+db:
+	python3 make_db.py
+
+check:
+	$(MAKE) -C tests check
 
 clean:
-	rm -rf $(OUT)
+	rm -f libGaugeApp.so GaugeApp_ALL_Texts.zip GaugeApp_ALL_Images.zip
+	$(MAKE) -C tests clean

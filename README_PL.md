@@ -1,6 +1,6 @@
 # Startowy projekt, napisany za pomocą Claude, nie testowany jeszcze
 
-# NBT Evo – dane silnika na ekranie iDrive
+# IDRIVE GAUGE APP – dane silnika na ekranie iDrive
 
 Natywna aplikacja iDrive (ID5/ID6, QNX) pokazująca na żywo: **temperaturę wody, temperaturę oleju, obroty, prędkość,
 bieg, poziom paliwa i zasięg oraz temperaturę zewnętrzną**. Pojawia się jako wiersz **„Dane silnika”** w menu
@@ -23,8 +23,8 @@ zainstalować obok NbtAad (niesprawdzone na aucie).
 ## Jak to działa
 
 HmiMain3D przy starcie ładuje `Plugins/<Nazwa>/<Nazwa>.manifest` (framework `PluginApp`, ten sam co w BMW
-SecurityMenu / ActiveSeating i w NbtAad). `EngineData.xml` opisuje wiersz menu i jeden ekran z siedmioma etykietami
-(`label`), każda związana z modelem tekstowym `raDataModel`. `libEngineData.so`:
+SecurityMenu / ActiveSeating i w NbtAad). `GaugeApp.xml` opisuje wiersz menu i jeden ekran z siedmioma etykietami
+(`label`), każda związana z modelem tekstowym `raDataModel`. `libGaugeApp.so`:
 
 1. po ok. 1,5 s od startu subskrybuje właściwości **CDS** (Car Data Service) – tym samym wywołaniem
    `cdsAddPropertyChangedEventHandler`, którym NbtAad czyta `driving.gear` i `sensors.PDCStatus`;
@@ -84,7 +84,7 @@ TOUCH_COMMAND** (bez tego HmiMain3D nie ładuje PluginApps). Do budowy: QNX SDP 
 
 ```
 cp /sciezka/do/libAppFramework.A.so /sciezka/do/libCoreFramework.A.so lib/     # z auta
-make            # libEngineData.so + EngineData_ALL_Texts.zip + EngineData_ALL_Images.zip
+make            # libGaugeApp.so + GaugeApp_ALL_Texts.zip + GaugeApp_ALL_Images.zip
 make check      # testy hostowe (zwykły g++, bez QNX)
 ```
 
@@ -95,26 +95,26 @@ make check      # testy hostowe (zwykły g++, bez QNX)
 Na head unit, pliki z pendrive'a (`/mnt/umass…` – sprawdź `ls /mnt`):
 
 ```
-mkdir -p /opt/hmi/ID5/data/ro/Plugins/EngineData
-cp /mnt/umassXXXX/libEngineData.so /opt/hmi/ID5/data/ro/Plugins/EngineData/
-cp /mnt/umassXXXX/EngineData.manifest /opt/hmi/ID5/data/ro/Plugins/EngineData/
-cp /mnt/umassXXXX/EngineData.xml /opt/hmi/ID5/data/ro/Plugins/EngineData/
-cp /mnt/umassXXXX/EngineData_ALL_Texts.zip /opt/hmi/ID5/data/ro/Plugins/EngineData/
-cp /mnt/umassXXXX/EngineData_ALL_Images.zip /opt/hmi/ID5/data/ro/Plugins/EngineData/
+mkdir -p /opt/hmi/ID5/data/ro/Plugins/GaugeApp
+cp /mnt/umassXXXX/libGaugeApp.so /opt/hmi/ID5/data/ro/Plugins/GaugeApp/
+cp /mnt/umassXXXX/GaugeApp.manifest /opt/hmi/ID5/data/ro/Plugins/GaugeApp/
+cp /mnt/umassXXXX/GaugeApp.xml /opt/hmi/ID5/data/ro/Plugins/GaugeApp/
+cp /mnt/umassXXXX/GaugeApp_ALL_Texts.zip /opt/hmi/ID5/data/ro/Plugins/GaugeApp/
+cp /mnt/umassXXXX/GaugeApp_ALL_Images.zip /opt/hmi/ID5/data/ro/Plugins/GaugeApp/
 ```
 
 Jeśli kopiowanie kończy się „read-only file system”, przemontuj cel do zapisu tak samo, jak przy NbtAad
 (`install.md`). Potem przytrzymaj przycisk zasilania ok. 30 s (restart). W **Media/Radio** powinien być wiersz
 **Dane silnika**.
 
-**Aktualizacja:** nie nadpisuj działającej biblioteki – `mv libEngineData.so libEngineData.so.old`, skopiuj nową,
-zrestartuj. **Odinstalowanie:** usuń folder `Plugins/EngineData` i zrestartuj. **Wyłącznik awaryjny bez usuwania:**
+**Aktualizacja:** nie nadpisuj działającej biblioteki – `mv libGaugeApp.so libGaugeApp.so.old`, skopiuj nową,
+zrestartuj. **Odinstalowanie:** usuń folder `Plugins/GaugeApp` i zrestartuj. **Wyłącznik awaryjny bez usuwania:**
 `mkdir -p /var/opt/engine && touch /var/opt/engine/app.disable` (`/opt/engine/app.disable` też działa, ale `/opt`
 bywa tylko do odczytu).
 
 ## Diagnostyka
 
-Aplikacja loguje przez `slog` (kod 0x4e47; `sloginfo | grep EngineData`). Łatwiej: **utwórz na komputerze pusty plik
+Aplikacja loguje przez `slog` (kod 0x4e47; `sloginfo | grep GaugeApp`). Łatwiej: **utwórz na komputerze pusty plik
 `nbt-engine-data.log` na pendrivie** i włóż go do auta – log będzie dopisywany tam (limit 4 MB).
 
 Każda właściwość CDS jest zapisana w logu w surowej postaci przy pierwszych 5 odczytach, np.
@@ -128,14 +128,14 @@ odczytu z innego źródła.
 
 **Brak wiersza w menu:** sprawdź kodowanie (A4A itd.), obecność wszystkich 5 plików, ewentualny konflikt
 `entryButtonFocusID` / `<id>` w manifeście oraz log HMI. Jeśli XML jest odrzucany, zacznij od zdjęcia `label`
-z `EngineData.xml` i sprawdzenia samego wiersza.
+z `GaugeApp.xml` i sprawdzenia samego wiersza.
 
 ## Dostosowanie
 
 - **Teksty i język wierszy:** makra `ENG_TXT_*` na górze sekcji „display rows” w `src/cds_values.hpp`
   (UTF-8; escape'y zapisane jako osobne literały).
 - **Nowa wartość:** dodaj pozycję w `enum Prop` i `propName`, regułę w `apply()`, wiersz w `formatRows`, kolejny
-  `raDataModel` + `label` w `EngineData.xml` (ID 28 / 38…), zwiększ `kRowCount`, `kPropCount` i tablicę `kStubs`.
+  `raDataModel` + `label` w `GaugeApp.xml` (ID 28 / 38…), zwiększ `kRowCount`, `kPropCount` i tablicę `kStubs`.
 - **Częstotliwość odświeżania:** `kRenderMs` w `src/engine_data.cpp`.
 
 ## Układ projektu
@@ -143,8 +143,8 @@ z `EngineData.xml` i sprawdzenia samego wiersza.
 ```
 src/cds_values.hpp     parsowanie CDS i formatowanie wierszy (czysta logika, testowana)
 src/engine_data.cpp    aplikacja: PluginApp, subskrypcja CDS, odświeżanie etykiet
-EngineData.xml         wiersz menu + ekran z 7 etykietami
-EngineData.manifest    manifest dla CAppManager
+GaugeApp.xml         wiersz menu + ekran z 7 etykietami
+GaugeApp.manifest    manifest dla CAppManager
 make_db.py             bazy tekstów i obrazów (+ ikona 63x54)
 tests/                 testy hostowe i atrapa frameworka
 ```

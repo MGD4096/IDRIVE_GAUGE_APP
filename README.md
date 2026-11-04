@@ -1,7 +1,7 @@
 # Initial project created with Claude, not yet tested
 [Polish version of readme](README_PL.md)
 
-# NBT Evo – engine data on the iDrive display
+# IDRIVE GAUGE APP – engine data on the iDrive display
 
 A native iDrive app (ID5/ID6, QNX) that shows live:
 temperature of coolant, oil temperature, engine RPM, speed, gear,
@@ -29,9 +29,9 @@ The identifiers were chosen so it can be installed alongside NbtAad
 
 HmiMain3D loads `Plugins/<Name>/<Name>.manifest` at startup
 (framework `PluginApp`, the same one used by BMW SecurityMenu /
-ActiveSeating and by NbtAad). `EngineData.xml` describes the menu row and
+ActiveSeating and by NbtAad). `GaugeApp.xml` describes the menu row and
 one screen with seven labels (`label`), each linked to a text model
-`raDataModel`. `libEngineData.so`:
+`raDataModel`. `libGaugeApp.so`:
 
 1. about 1.5 s after startup, subscribes to **CDS** (Car Data Service)
    properties – using the same `cdsAddPropertyChangedEventHandler`
@@ -105,7 +105,7 @@ unit (`/opt/hmi/ID5/lib`).
 
 ```
 cp /path/to/libAppFramework.A.so /path/to/libCoreFramework.A.so lib/     # from the car
-make            # libEngineData.so + EngineData_ALL_Texts.zip + EngineData_ALL_Images.zip
+make            # libGaugeApp.so + GaugeApp_ALL_Texts.zip + GaugeApp_ALL_Images.zip
 make check      # host tests (regular g++, no QNX)
 ```
 
@@ -118,12 +118,12 @@ On the head unit, copy the files from a USB stick (`/mnt/umass…` –
 check `ls /mnt`):
 
 ```
-mkdir -p /opt/hmi/ID5/data/ro/Plugins/EngineData
-cp /mnt/umassXXXX/libEngineData.so /opt/hmi/ID5/data/ro/Plugins/EngineData/
-cp /mnt/umassXXXX/EngineData.manifest /opt/hmi/ID5/data/ro/Plugins/EngineData/
-cp /mnt/umassXXXX/EngineData.xml /opt/hmi/ID5/data/ro/Plugins/EngineData/
-cp /mnt/umassXXXX/EngineData_ALL_Texts.zip /opt/hmi/ID5/data/ro/Plugins/EngineData/
-cp /mnt/umassXXXX/EngineData_ALL_Images.zip /opt/hmi/ID5/data/ro/Plugins/EngineData/
+mkdir -p /opt/hmi/ID5/data/ro/Plugins/GaugeApp
+cp /mnt/umassXXXX/libGaugeApp.so /opt/hmi/ID5/data/ro/Plugins/GaugeApp/
+cp /mnt/umassXXXX/GaugeApp.manifest /opt/hmi/ID5/data/ro/Plugins/GaugeApp/
+cp /mnt/umassXXXX/GaugeApp.xml /opt/hmi/ID5/data/ro/Plugins/GaugeApp/
+cp /mnt/umassXXXX/GaugeApp_ALL_Texts.zip /opt/hmi/ID5/data/ro/Plugins/GaugeApp/
+cp /mnt/umassXXXX/GaugeApp_ALL_Images.zip /opt/hmi/ID5/data/ro/Plugins/GaugeApp/
 ```
 
 If copying ends with “read-only file system”, remount the destination
@@ -132,15 +132,15 @@ button for about 30 s (restart). In **Media/Radio**, the row
 **Engine Data** should appear.
 
 **Update:** do not overwrite a working library – move it:
-`mv libEngineData.so libEngineData.so.old`, copy the new one,
-then restart. **Uninstall:** delete the `Plugins/EngineData` folder and
+`mv libGaugeApp.so libGaugeApp.so.old`, copy the new one,
+then restart. **Uninstall:** delete the `Plugins/GaugeApp` folder and
 restart. **Emergency disable without deleting:**  
 `mkdir -p /var/opt/engine && touch /var/opt/engine/app.disable`
 (`/opt/engine/app.disable` also works, but `/opt` is often read-only).
 
 ## Diagnostics
 
-The app logs via `slog` (code 0x4e47; `sloginfo | grep EngineData`).
+The app logs via `slog` (code 0x4e47; `sloginfo | grep GaugeApp`).
 Easier: **create an empty file named `nbt-engine-data.log` on your computer
 and place it on the USB stick**; logs will be appended there (limit 4 MB).
 
@@ -158,7 +158,7 @@ from another source.
 **No menu row:** check the encoding (A4A etc.), presence of all 5 files,
 possible conflict in `entryButtonFocusID` / `<id>` in the manifest, and the
 HMI log. If the XML is rejected, start by removing `label` from
-`EngineData.xml` and verify the menu row itself.
+`GaugeApp.xml` and verify the menu row itself.
 
 ## Customization
 
@@ -167,7 +167,7 @@ HMI log. If the XML is rejected, start by removing `label` from
   (UTF-8; escapes are stored as separate literals).
 - **New value:** add an entry in `enum Prop` and `propName`, a rule in
   `apply()`, a row in `formatRows`, another `raDataModel` + `label` in
-  `EngineData.xml` (ID 28 / 38…), and increase `kRowCount`,
+  `GaugeApp.xml` (ID 28 / 38…), and increase `kRowCount`,
   `kPropCount`, and the `kStubs` array.
 - **Refresh frequency:** `kRenderMs` in `src/engine_data.cpp`.
 
@@ -176,8 +176,8 @@ HMI log. If the XML is rejected, start by removing `label` from
 ```
 src/cds_values.hpp     CDS parsing and row formatting logic (pure logic, tested)
 src/engine_data.cpp    app: PluginApp, CDS subscription, label refresh
-EngineData.xml         menu row + screen with 7 labels
-EngineData.manifest    manifest for CAppManager
+GaugeApp.xml         menu row + screen with 7 labels
+GaugeApp.manifest    manifest for CAppManager
 make_db.py             text and image databases (+ 63x54 icon)
 tests/                 host tests and framework mock
 ```

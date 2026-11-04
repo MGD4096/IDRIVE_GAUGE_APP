@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
-// libEngineData.so - live engine data (coolant / oil temperature, RPM, speed, gear, fuel, outside temperature) as a
+// libGaugeApp.so - live engine data (coolant / oil temperature, RPM, speed, gear, fuel, outside temperature) as a
 // native iDrive "PluginApp" for BMW NBT Evo head units (ID5 / ID6).
 //
-// How it works: HmiMain3D loads Plugins/EngineData/EngineData.manifest at boot. EngineData.xml adds a menu row and one
+// How it works: HmiMain3D loads Plugins/GaugeApp/GaugeApp.manifest at boot. GaugeApp.xml adds a menu row and one
 // screen (hmiState 10) with seven labels, each bound to a raDataModel (text). This library subscribes to the car's
 // CDS properties (the same call NBT-AAD uses for driving.gear / sensors.PDCStatus), keeps the latest values and, twice
 // a second, writes changed rows into the label models with PluginApp::updateModel(model, text).
@@ -12,7 +12,7 @@
 // that are needed here are repeated, there are no BMW headers. Not built or run against a real head unit yet - see
 // README.md.
 //
-// Logs: slog (code 0x4e47) always; plus <usb stick>/nbt-engine-data.log if that file already exists on a stick
+// Logs: slog (code 0x4e47) always; plus <usb stick>/gauge-app.log if that file already exists on a stick
 // (create an empty one on a PC to switch it on).
 #include <stdio.h>
 #include <stdarg.h>
@@ -82,13 +82,13 @@ private:
 namespace {
 
 // ---- constants --------------------------------------------------------------------------------------------------
-const unsigned    kFirstRowModel = 21;       // raDataModel ids 21..27 in EngineData.xml, one per row
+const unsigned    kFirstRowModel = 21;       // raDataModel ids 21..27 in GaugeApp.xml, one per row
 const unsigned    kSubscribeDelayMs = 1500;  // CDS handlers are registered ~1.5 s after onInit, like NBT-AAD / SecurityMenu
 const unsigned    kRenderMs = 500;           // label refresh period (only changed rows are written)
 const long        kNoDataWarnS = 25;         // log once when no CDS value arrived this long after subscribing
-const char* const kDisableA = "/opt/engine/app.disable";
-const char* const kDisableB = "/var/opt/engine/app.disable";
-const char* const kUsbLogName = "nbt-engine-data.log";
+const char* const kDisableA = "/opt/gaugeapp/app.disable";
+const char* const kDisableB = "/var/opt/gaugeapp/app.disable";
+const char* const kUsbLogName = "gauge-app.log";
 const long        kUsbLogMaxBytes = 4L * 1024L * 1024L;
 enum { kSlotOnError = 21, kSlotOnInit = 22, kSlotOnFinalize = 23, kVtblSlots = 34 };   // PluginApp vtable layout
 
@@ -102,7 +102,7 @@ bool fileExists(const char* p) {
     return stat(p, &st) == 0;
 }
 
-// <stick>/nbt-engine-data.log of the first /mnt/umass* stick that already holds that file (an empty file made on a
+// <stick>/gauge-app.log of the first /mnt/umass* stick that already holds that file (an empty file made on a
 // PC switches the log on). Looked up at most every 5 s.
 bool usbLogPath(char* out, size_t n) {
     pthread_mutex_lock(&g_logMutex);
@@ -141,7 +141,7 @@ void elog(const char* fmt, ...) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     char line[400];
-    int n = snprintf(line, sizeof(line), "[%5ld.%03ld] [EngineData] %s\n", (long)ts.tv_sec,
+    int n = snprintf(line, sizeof(line), "[%5ld.%03ld] [GaugeApp] %s\n", (long)ts.tv_sec,
                      (long)(ts.tv_nsec / 1000000), msg);
     if (n < 0) return;
     if (n >= (int)sizeof(line)) n = (int)sizeof(line) - 1;
@@ -155,7 +155,7 @@ void elog(const char* fmt, ...) {
         }
     }
 #ifdef __QNX__
-    slogf(_SLOG_SETCODE(0x4e47, 1), _SLOG_INFO, "[EngineData] %s", msg);
+    slogf(_SLOG_SETCODE(0x4e47, 1), _SLOG_INFO, "[GaugeApp] %s", msg);
 #else
     fputs(line, stderr);                                  // host tests
 #endif
@@ -325,7 +325,7 @@ bmw::PluginApp* createApp(bmw::IDispatcher& dispatcher, const char* name, const 
 
     void* mem = ::operator new(bmw::kPluginAppStorage);
     memset(mem, 0, bmw::kPluginAppStorage);
-    bmw::PluginApp* app = new (mem) bmw::PluginApp(dispatcher, bmw::BasicString<char>(name ? name : "EngineData"), 1, 0,
+    bmw::PluginApp* app = new (mem) bmw::PluginApp(dispatcher, bmw::BasicString<char>(name ? name : "GaugeApp"), 1, 0,
                                                    bmw::RHMI_INTERFACE_VERSION_1, params, config);
 
     // Own vtable: identical to bmw::PluginApp's, with our onInit / onError / onFinalize (what a C++ subclass would do).
@@ -367,6 +367,6 @@ struct EnginePluginAppInfo {
     void (*destroy)(void*);
 };
 __attribute__((visibility("default"))) EnginePluginAppInfo pluginAppInfo = {
-    1, 0, "Engine Data", "NBT-ENGINE", 1, &createApp, &destroyApp
+    1, 0, "GAUGE APP", "NBT-ENGINE", 1, &createApp, &destroyApp
 };
 }

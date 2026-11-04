@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
-# Builds EngineData_ALL_Texts.zip (<lang>.txt with "id=text" lines, the format of BMW's PluginsCoded apps, as used by
-# NBT-AAD) and EngineData_ALL_Images.zip (<imageId>.png). Needs Pillow for the icon.
+# Builds GaugeApp_ALL_Texts.zip (<lang>.txt with "id=text" lines, the format of BMW's PluginsCoded apps, as used by
+# NBT-AAD) and GaugeApp_ALL_Images.zip (<imageId>.png). Needs Pillow for the icon.
 #   text 1 = menu row / screen title        image 56001 = 63x54 row icon
 import math
 import os
@@ -13,17 +13,17 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Language file names are the ones NBT-AAD ships (BMW's language codes); ASCII only, like its text DB.
 LANGS = {
-    "de": ("Deutsch", "Motordaten"),
-    "en-UK": ("English (UK)", "Engine data"),
-    "en-US": ("English (US)", "Engine data"),
-    "es-ES": ("Espanol", "Datos del motor"),
-    "es-US": ("Espanol (US)", "Datos del motor"),
-    "fr-FR": ("Francais", "Donnees moteur"),
-    "fr-CA": ("Francais (CA)", "Donnees moteur"),
-    "it": ("Italiano", "Dati motore"),
-    "pt": ("Portugues", "Dados do motor"),
-    "ru": ("Russian", "Engine data"),
-    "pl": ("Polski", "Dane silnika"),
+    "de": ("Deutsch", "GAUGE APP"),
+    "en-UK": ("English (UK)", "GAUGE APP"),
+    "en-US": ("English (US)", "GAUGE APP"),
+    "es-ES": ("Espanol", "GAUGE APP"),
+    "es-US": ("Espanol (US)", "GAUGE APP"),
+    "fr-FR": ("Francais", "GAUGE APP"),
+    "fr-CA": ("Francais (CA)", "GAUGE APP"),
+    "it": ("Italiano", "GAUGE APP"),
+    "pt": ("Portugues", "GAUGE APP"),
+    "ru": ("Russian", "GAUGE APP"),
+    "pl": ("Polski", "GAUGE APP"),
 }
 
 
@@ -48,16 +48,16 @@ def make_icon(path):
 
 
 def main():
-    with zipfile.ZipFile(os.path.join(HERE, "EngineData_ALL_Texts.zip"), "w", zipfile.ZIP_DEFLATED) as z:
+    with zipfile.ZipFile(os.path.join(HERE, "GaugeApp_ALL_Texts.zip"), "w", zipfile.ZIP_DEFLATED) as z:
         for lang, (langname, title) in LANGS.items():
             body = "100000=%s\n1=%s\n" % (langname, title)
             z.writestr(lang + ".txt", body.encode("utf-8"))
     icon = os.path.join(HERE, "res", "row_icon_63x54.png")
     os.makedirs(os.path.dirname(icon), exist_ok=True)
     make_icon(icon)
-    with zipfile.ZipFile(os.path.join(HERE, "EngineData_ALL_Images.zip"), "w", zipfile.ZIP_DEFLATED) as z:
+    with zipfile.ZipFile(os.path.join(HERE, "GaugeApp_ALL_Images.zip"), "w", zipfile.ZIP_DEFLATED) as z:
         z.write(icon, "56001.png")
-    print("wrote EngineData_ALL_Texts.zip, EngineData_ALL_Images.zip")
+    print("wrote GaugeApp_ALL_Texts.zip, GaugeApp_ALL_Images.zip")
 
 
 if __name__ == "__main__":

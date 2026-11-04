@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
-// Host test: loads a host build of libEngineData.so the way ManagedPluginApp does (dlsym "pluginAppInfo"), drives
+// Host test: loads a host build of libGaugeApp.so the way ManagedPluginApp does (dlsym "pluginAppInfo"), drives
 // create / onInit / the posted Runnables / CDS callbacks / onFinalize / destroy against the fake framework and checks
 // what ends up in the label models.
 #include <dlfcn.h>
@@ -50,7 +50,7 @@ static void feed(const char* prop, const char* ascii) {
 static const std::string& row(unsigned i) { return g_fake.modelText[21 + i]; }
 
 int main(int argc, char** argv) {
-    if (argc < 2) { printf("usage: %s libEngineData.so\n", argv[0]); return 2; }
+    if (argc < 2) { printf("usage: %s libGaugeApp.so\n", argv[0]); return 2; }
     void* h = dlopen(argv[1], RTLD_NOW | RTLD_GLOBAL);
     if (!h) { printf("dlopen: %s\n", dlerror()); return 1; }
     Info* info = (Info*)dlsym(h, "pluginAppInfo");
@@ -59,10 +59,10 @@ int main(int argc, char** argv) {
     CHECK(info->a == 1 && info->b == 0 && info->rhmi == 1);
 
     char dummy[16];
-    bmw::PluginApp* app = info->create(*(bmw::IDispatcher*)dummy, "EngineData", *(bmw::Bundle*)dummy, *(bmw::Bundle*)dummy);
+    bmw::PluginApp* app = info->create(*(bmw::IDispatcher*)dummy, "GaugeApp", *(bmw::Bundle*)dummy, *(bmw::Bundle*)dummy);
     if (!app) { printf("create returned NULL\n"); return 1; }
-    CHECK(strcmp(app->name, "EngineData") == 0);
-    CHECK(info->create(*(bmw::IDispatcher*)dummy, "EngineData", *(bmw::Bundle*)dummy, *(bmw::Bundle*)dummy) == NULL);   // single instance
+    CHECK(strcmp(app->name, "GaugeApp") == 0);
+    CHECK(info->create(*(bmw::IDispatcher*)dummy, "GaugeApp", *(bmw::Bundle*)dummy, *(bmw::Bundle*)dummy) == NULL);   // single instance
 
     // ---- onInit (virtual call: reaches the library's override through its own vtable) ----
     bool ok = app->onInit();

@@ -7,9 +7,9 @@ CXX ?= g++
 WARN := -Wall -Wextra
 
 .PHONY: check clean
-check: $(OUT)/test_cds_values $(OUT)/app_host_test $(OUT)/libEngineData.so
+check: $(OUT)/test_cds_values $(OUT)/app_host_test $(OUT)/libGaugeApp.so
 	$(OUT)/test_cds_values
-	$(OUT)/app_host_test $(OUT)/libEngineData.so
+	$(OUT)/app_host_test $(OUT)/libGaugeApp.so
 
 $(OUT):
 	mkdir -p $(OUT)
@@ -18,7 +18,7 @@ $(OUT):
 $(OUT)/test_cds_values: test_cds_values.cpp ../src/cds_values.hpp | $(OUT)
 	$(CXX) -std=gnu++98 $(WARN) -I../src -o $@ test_cds_values.cpp
 
-$(OUT)/libEngineData.so: ../src/engine_data.cpp ../src/cds_values.hpp | $(OUT)
+$(OUT)/libGaugeApp.so: ../src/engine_data.cpp ../src/cds_values.hpp | $(OUT)
 	$(CXX) -std=gnu++98 $(WARN) -fPIC -shared -I../src -o $@ ../src/engine_data.cpp -ldl -lpthread
 
 # -rdynamic: the library looks up bmw::Runnable's vtable with dlsym(RTLD_DEFAULT) and needs the fake's symbols.

@@ -2,11 +2,11 @@
 <!-- Engine data screen for NBT Evo. Placement is the one NBT-AAD uses (car-verified there): a row in the Media/Radio
      list (native state 20), after the Bluetooth audio row (focus 2270). entryButtonFocusID and applicationWeight differ
      from NBT-AAD's (32752 / 200) so both apps can be installed side by side.
-     hmiState 10 holds seven labels. Each label is bound to a raDataModel (ids 21..27); libEngineData.so writes the
+     hmiState 10 holds seven labels. Each label is bound to a raDataModel (ids 21..27); libGaugeApp.so writes the
      text into those models with PluginApp::updateModel. Property ids: 2 = SELECTABLE, 3 = VISIBLE (RHMI property
      table; 2 / 3 / 9 / 10 / 20 / 21 are the ones NBT-AAD's XML uses as well). -->
 <pluginApps>
-  <pluginApp applicationType="Custom" applicationWeight="210" entryButtonFocusID="32751" insertAfterFocusID="2270" insertStateID="20" text="Dane silnika">
+  <pluginApp applicationType="Custom" applicationWeight="210" entryButtonFocusID="32751" insertAfterFocusID="2270" insertStateID="20" text="GAUGE APP">
     <comment/>
     <entryButton action="5" id="1" model="3" imageModel="4">
       <properties/>
@@ -28,7 +28,7 @@
       <raDataModel id="27"/>
     </models>
     <hmiStates>
-      <hmiState id="10" text="Dane silnika" textModel="3">
+      <hmiState id="10" text="GAUGE APP" textModel="3">
         <components>
           <label id="31" model="21">
             <properties>
