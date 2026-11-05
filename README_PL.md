@@ -1,5 +1,7 @@
 # Startowy projekt, napisany za pomocą Claude
 Działa, ale czasami może zawiesić główną jednostkę (head unit) albo to zależy od mojej konfiguracji. W ciągu najbliższych kilku dni przetestuję to rozwiązanie bardziej szczegółowo.
+![NBTEvo with running app](/images/20261105_220049.jpg)
+
 
 # IDRIVE GAUGE APP – dane silnika na ekranie iDrive
 
