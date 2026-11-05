@@ -1,4 +1,5 @@
-# Startowy projekt, napisany za pomocą Claude, nie testowany jeszcze
+# Startowy projekt, napisany za pomocą Claude
+Działa, ale czasami może zawiesić główną jednostkę (head unit) albo to zależy od mojej konfiguracji. W ciągu najbliższych kilku dni przetestuję to rozwiązanie bardziej szczegółowo.
 
 # IDRIVE GAUGE APP – dane silnika na ekranie iDrive
 

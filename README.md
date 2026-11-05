@@ -1,4 +1,8 @@
-# Initial project created with Claude, not yet tested
+# Initial project created with Claude
+It works, but sometimes it can crash the head unit, or maybe it depends on my setup. In the next few days, I will test this solution more thoroughly.
+![NBTEvo with running app](/images/20261105_220049.jpg)
+
+
 [Polish version of readme](README_PL.md)
 
 # IDRIVE GAUGE APP – engine data on the iDrive display
